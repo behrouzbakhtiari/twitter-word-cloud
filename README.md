@@ -9,7 +9,7 @@
 - <a href="https://github.com/pandas-dev/pandas">Pandas</a>
 
 # how to run :
-
+- `pip install -r requirements.txt` (Install dependencies)
 - `python twc.py username words-count` (python twc.py behrozBakhtiari 200)
 
 # Sample Output:
