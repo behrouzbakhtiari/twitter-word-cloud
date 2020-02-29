@@ -27,7 +27,6 @@ output_dir = "output"
 def export_tweets():
     c = twint.Config()
     c.Username = username
-    twint.run.Search(c)
     c.Store_csv = True
     c.Output = tweets_file_path
     twint.run.Search(c)
