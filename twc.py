@@ -18,6 +18,7 @@ username = ""
 max_words = 200
 tweets_file_path = ""
 image_file_path = ""
+output_dir = "output"
 
 # get tweets from twiter with twint library
 # twint repo: https://github.com/twintproject/twint
@@ -125,8 +126,11 @@ def main():
     global image_file_path
     username = sys.argv[1]
 
-    tweets_file_path = "output/{}.csv".format(username)
-    image_file_path = "output/{}.png".format(username)
+    if not os.path.isdir(output_dir):
+        os.mkdir(output_dir)
+
+    tweets_file_path = "{}/{}.csv".format(output_dir, username)
+    image_file_path = "{}/{}.png".format(output_dir, username)
 
     if len(sys.argv) > 2 and sys.argv[2].isnumeric():
         max_words = int(sys.argv[2])
