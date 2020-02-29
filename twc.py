@@ -65,6 +65,7 @@ def remove_emoji(tweet):
 
 
 def clean_tweet(tweet):
+    tweet = str(tweet)
     tweet = tweet.lower()
     tweet = tp.clean(tweet)
     tweet = remove_emoji(tweet)
