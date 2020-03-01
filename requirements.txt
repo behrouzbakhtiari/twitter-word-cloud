@@ -1,5 +1,4 @@
 twint
-tweet-preprocessor
 hazm
 persian_wordcloud
 pandas

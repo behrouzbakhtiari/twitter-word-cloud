@@ -1,6 +1,5 @@
 import twint
 from string import punctuation
-import preprocessor as tp
 import pandas as pd
 from hazm import *
 from persian_wordcloud.wordcloud import PersianWordCloud, add_stop_words
@@ -34,6 +33,21 @@ def export_tweets():
     c.Store_csv = True
     c.Output = tweets_file_path
     twint.run.Search(c)
+
+# remove links from tweet text
+
+
+def remove_links(tweet):
+    return re.sub(
+        r'(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})\S*', '', tweet)
+
+
+def remove_mentions(tweet):
+    return re.sub(r'@\w*', '', tweet)
+
+
+def remove_reserved_words(tweet):
+    return re.sub(r'^(RT|FAV)', '', tweet)
 
 # remove enoji and some unicode chars from tweet text
 
@@ -70,13 +84,18 @@ def remove_emoji(tweet):
 def clean_tweet(tweet):
     tweet = str(tweet)
     tweet = tweet.lower()
-    tweet = tweet.replace("#", "") # remove # so we preserve hashtags for the cloud
-    tweet = tp.clean(tweet)
+    # remove # so we preserve hashtags for the cloud
+    tweet = tweet.replace("#", "")
+    tweet = remove_links(tweet)
+    tweet = remove_mentions(tweet)
     tweet = remove_emoji(tweet)
+    tweet = remove_reserved_words(tweet)
     normalizer = Normalizer()
     tweet = normalizer.normalize(tweet)
-    tweet = re.sub(r'ن?می[‌]\S+','',tweet) # removes verbs such as می‌شود or نمی‌گویند
+    # removes verbs such as می‌شود or نمی‌گویند
+    tweet = re.sub(r'ن?می[‌]\S+', '', tweet)
     tokens = word_tokenize(tweet)
+    tokens = [token for token in tokens if not token.isdigit()]
     tokens = [token for token in tokens if token not in stopwords.persian]
     tokens = [token for token in tokens if token not in stopwords.english]
     return " ".join(tokens).strip()
