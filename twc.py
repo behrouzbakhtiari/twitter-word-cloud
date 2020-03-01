@@ -75,6 +75,7 @@ def clean_tweet(tweet):
     tweet = remove_emoji(tweet)
     normalizer = Normalizer()
     tweet = normalizer.normalize(tweet)
+    tweet = re.sub(r'ن?می[‌]\S+','',tweet) # removes verbs such as می‌شود or نمی‌گویند
     tokens = word_tokenize(tweet)
     tokens = [token for token in tokens if token not in stopwords.persian]
     tokens = [token for token in tokens if token not in stopwords.english]
