@@ -70,6 +70,7 @@ def remove_emoji(tweet):
 def clean_tweet(tweet):
     tweet = str(tweet)
     tweet = tweet.lower()
+    tweet = tweet.replace("#", "") # remove # so we preserve hashtags for the cloud
     tweet = tp.clean(tweet)
     tweet = remove_emoji(tweet)
     normalizer = Normalizer()
