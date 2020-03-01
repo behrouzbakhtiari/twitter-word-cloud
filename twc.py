@@ -25,6 +25,10 @@ output_dir = "output"
 
 
 def export_tweets():
+    if os.path.isfile(tweets_file_path):
+        print(f"{tweets_file_path} is found and it will be processed.")
+        print("If you want to get tweets from twitter, remove this file")
+        return
     c = twint.Config()
     c.Username = username
     c.Store_csv = True
