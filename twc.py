@@ -54,7 +54,6 @@ def remove_emoji(tweet):
                                u"\ufe0f"
                                u"\u2069"
                                u"\u2066"
-                               u"\u200c"
                                u"\u2068"
                                u"\u2067"
                                "]+", flags=re.UNICODE)
