@@ -31,6 +31,7 @@ def export_tweets():
     c = twint.Config()
     c.Username = username
     c.Store_csv = True
+    c.Format = "Username: {username} |  Date: {date} {time}"
     c.Output = tweets_file_path
     twint.run.Search(c)
 
