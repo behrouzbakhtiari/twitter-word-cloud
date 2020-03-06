@@ -4,7 +4,7 @@ import twint
 from string import punctuation
 import pandas as pd
 from hazm import *
-from persian_wordcloud.wordcloud import PersianWordCloud, add_stop_words
+from wordcloud import WordCloud
 import re
 import sys
 from PIL import Image
@@ -14,6 +14,9 @@ import stopwords
 from collections import Counter
 import os
 from random import randint
+from arabic_reshaper import arabic_reshaper
+from bidi.algorithm import get_display
+
 
 punctuation_list = list(punctuation)
 
@@ -135,13 +138,14 @@ def clean_tweet(tweet):
 
 def draw_cloud(cleantweets, image_path, show_image=False):
     text = " ".join(str(tweet) for tweet in cleantweets)
+    text = get_display(arabic_reshaper.reshape(text))
     tokens = word_tokenize(text)
     dic = Counter(tokens)
+    print(dic.most_common(max_words))
     twitter_mask = np.array(Image.open("twitter-logo.jpg"))
     font_path = select_a_font()
-    wordcloud = PersianWordCloud(
+    wordcloud = WordCloud(
         font_path=font_path,
-        only_persian=True,
         max_words=max_words,
         margin=0,
         width=800,
@@ -150,7 +154,8 @@ def draw_cloud(cleantweets, image_path, show_image=False):
         max_font_size=500,
         background_color="white",
         mask=twitter_mask
-    ).generate(text)
+    )
+    wordcloud.generate_from_frequencies(dic)
 
     image = wordcloud.to_image()
     wordcloud.to_file(image_path)
@@ -198,6 +203,7 @@ def generate_word_cloud():
             image_path = os.path.join(
                 monthly_image_path, month+image_file_extension)
             draw_cloud(month_data.clean_tweet.values, image_path)
+
     image_path = os.path.join(output_dir, username+image_file_extension)
     draw_cloud(data.clean_tweet.values, image_path, True)
 

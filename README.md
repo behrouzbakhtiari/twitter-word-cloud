@@ -6,7 +6,7 @@ A tool to generate word cloud images from twitter user timeline.
 
 - <a href="https://github.com/twintproject/twint">TWINT - Twitter Intelligence Tool</a>
 - <a href="https://github.com/sobhe/hazm">Hazm</a>
-- <a href="https://github.com/mehotkhan/persian-word-cloud">Persian Word Cloud Generator</a>
+- <a href="https://github.com/amueller/word_cloud">Word Cloud generator</a>
 - <a href="https://github.com/pandas-dev/pandas">Pandas</a>
 
 # how to run :

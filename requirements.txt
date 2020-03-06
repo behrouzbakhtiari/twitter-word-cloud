@@ -1,4 +1,4 @@
 twint
 hazm
-persian_wordcloud
+wordcloud
 pandas
