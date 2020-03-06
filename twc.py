@@ -1,3 +1,5 @@
+from matplotlib.cbook import get_sample_data
+import argparse
 import twint
 from string import punctuation
 import pandas as pd
@@ -11,16 +13,38 @@ from os import path
 import stopwords
 from collections import Counter
 import os
+from random import randint
+
 punctuation_list = list(punctuation)
+
+parser = argparse.ArgumentParser(description='Twitter word cloud generator')
+parser.add_argument("-u", "--username", help="twiter username", required=True)
+parser.add_argument("-f", "--font", help="font name")
+parser.add_argument(
+    "-c", "--count", help="Number of words to show on word cloud image")
+parser.add_argument("-l", "--limit", help="Number of tweets to pull")
 
 username = ""
 max_words = 200
 tweets_file_path = ""
 image_file_path = ""
+limit = None
+font_name = ""
 output_dir = "output"
+fonts_dir = "fonts"
+image_file_extension = '.png'
 
-# get tweets from twiter with twint library
-# twint repo: https://github.com/twintproject/twint
+
+def select_a_font():
+    if font_name is not None and os.path.isfile(os.path.join(fonts_dir, font_name)):
+        return os.path.join(fonts_dir, font_name)
+
+    fonts = [file_name for file_name in os.listdir(
+        fonts_dir) if os.path.isfile(os.path.join(fonts_dir, file_name)) and file_name.endswith(".ttf")]
+    if len(fonts) > 0:
+        font_index = randint(0, len(fonts)-1)
+        return os.path.join(fonts_dir, fonts[font_index])
+    return ""
 
 
 def export_tweets():
@@ -29,6 +53,10 @@ def export_tweets():
         print("If you want to get tweets from twitter, remove this file")
         return
     c = twint.Config()
+
+    if limit is not None:
+        c.Limit = limit
+
     c.Username = username
     c.Store_csv = True
     c.Format = "Username: {username} |  Date: {date} {time}"
@@ -105,13 +133,14 @@ def clean_tweet(tweet):
 # persian word cloud repo: https://github.com/mehotkhan/persian-word-cloud
 
 
-def draw_cloud(cleantweets):
+def draw_cloud(cleantweets, image_path, show_image=False):
     text = " ".join(str(tweet) for tweet in cleantweets)
     tokens = word_tokenize(text)
     dic = Counter(tokens)
-    print(dic.most_common(max_words))
     twitter_mask = np.array(Image.open("twitter-logo.jpg"))
+    font_path = select_a_font()
     wordcloud = PersianWordCloud(
+        font_path=font_path,
         only_persian=True,
         max_words=max_words,
         margin=0,
@@ -124,8 +153,15 @@ def draw_cloud(cleantweets):
     ).generate(text)
 
     image = wordcloud.to_image()
-    wordcloud.to_file(image_file_path)
-    image.show()
+    wordcloud.to_file(image_path)
+    if show_image:
+        image.show()
+    print(f"Generated image {image_path}")
+
+
+def check_dir(path):
+    if not os.path.isdir(path):
+        os.mkdir(path)
 
 
 def generate_word_cloud():
@@ -137,28 +173,56 @@ def generate_word_cloud():
     if 'clean_tweet' not in data.columns:
         data.insert(11, 'clean_tweet', '')
         data['clean_tweet'] = data['tweet'].apply(lambda x: clean_tweet(x))
-    draw_cloud(data.clean_tweet.values)
+
+    years = data['date'].str[0: 4].unique()
+    global output_dir
+    output_dir = os.path.join(output_dir, username)
+    check_dir(output_dir)
+
+    yearly_image_path = os.path.join(output_dir, "yearly")
+    check_dir(yearly_image_path)
+
+    monthly_image_path = os.path.join(output_dir, "montly")
+    check_dir(monthly_image_path)
+
+    # genarate yearly word cloud
+    for year in years:
+        year_data = data[data['date'].str[0: 4] == year]
+        image_path = os.path.join(yearly_image_path, year+image_file_extension)
+        draw_cloud(year_data.clean_tweet.values, image_path)
+
+        # genarate monthly word cloud
+        months = year_data['date'].str[0: 7].unique()
+        for month in months:
+            month_data = year_data[year_data['date'].str[0: 7] == month]
+            image_path = os.path.join(
+                monthly_image_path, month+image_file_extension)
+            draw_cloud(month_data.clean_tweet.values, image_path)
+    image_path = os.path.join(output_dir, username+image_file_extension)
+    draw_cloud(data.clean_tweet.values, image_path, True)
 
 
 def main():
-    if len(sys.argv) < 2:
-        sys.stderr.write("Username is requried")
-        exit(-1)
-
     global username
     global max_words
     global tweets_file_path
     global image_file_path
-    username = sys.argv[1]
+    global limit
+    global font_name
 
-    if not os.path.isdir(output_dir):
-        os.mkdir(output_dir)
+    args = parser.parse_args()
+    username = args.username
 
-    tweets_file_path = "{}/{}.csv".format(output_dir, username)
-    image_file_path = "{}/{}.png".format(output_dir, username)
+    check_dir(output_dir)
 
-    if len(sys.argv) > 2 and sys.argv[2].isnumeric():
-        max_words = int(sys.argv[2])
+    if args.count is not None and args.count.isnumeric():
+        max_words = int(args.count)
+
+    limit = args.limit
+    font_name = args.font
+
+    tweets_file_path = os.path.join(output_dir, f"{username}.csv")
+
     generate_word_cloud()
 
 
