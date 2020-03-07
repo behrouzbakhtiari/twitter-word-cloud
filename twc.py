@@ -187,7 +187,7 @@ def generate_word_cloud():
     yearly_image_path = os.path.join(output_dir, "yearly")
     check_dir(yearly_image_path)
 
-    monthly_image_path = os.path.join(output_dir, "montly")
+    monthly_image_path = os.path.join(output_dir, "monthly")
     check_dir(monthly_image_path)
 
     # genarate yearly word cloud
