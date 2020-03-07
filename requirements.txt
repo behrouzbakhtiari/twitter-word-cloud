@@ -2,3 +2,5 @@ twint
 hazm
 wordcloud
 pandas
+arabic_reshaper
+python-bidi
