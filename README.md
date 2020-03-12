@@ -16,6 +16,18 @@ A tool to generate word cloud images from twitter user timeline.
 - `python twc.py -u twitter_username -c 100` - Scrape all the Tweets from user's timeline and genarate word cloud images with 100 words.
 - `python twc.py -u twitter_username -f "XB Zar.ttf"` - Scrape all the Tweets from user's timeline and use "XB Zar.ttf" font on the image. Yon can find fonts in the `fonts` folder.
 
+  # Ngram
+
+  If you need a word cloud with a sequence of N adjacent word, you can use -n parameter.
+
+  - `python twc.py -u Rouhani_ir -n 2`
+
+  ![Bigram](Rouhani_ir_2.png?raw=true)
+
+  - `python twc.py -u Rouhani_ir -n 3`
+
+  ![Trigram](Rouhani_ir_3.png?raw=true)
+
 # Sample Output:
 
-![Sample Result](BehrozBakhtiari.png?raw=true)
+![Sample Result](Rouhani_ir.png?raw=true)

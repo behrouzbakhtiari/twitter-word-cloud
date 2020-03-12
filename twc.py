@@ -16,7 +16,7 @@ import os
 from random import randint
 from arabic_reshaper import arabic_reshaper
 from bidi.algorithm import get_display
-
+import operator
 
 punctuation_list = list(punctuation)
 
@@ -26,6 +26,7 @@ parser.add_argument("-f", "--font", help="font name")
 parser.add_argument(
     "-c", "--count", help="Number of words to show on word cloud image")
 parser.add_argument("-l", "--limit", help="Number of tweets to pull")
+parser.add_argument("-n", "--ngram", help="Number of tweets to pull")
 
 username = ""
 max_words = 200
@@ -36,6 +37,8 @@ font_name = ""
 output_dir = "output"
 fonts_dir = "fonts"
 image_file_extension = '.png'
+ngram_size = 1
+ngram = dict()
 
 
 def select_a_font():
@@ -81,7 +84,7 @@ def remove_mentions(tweet):
 def remove_reserved_words(tweet):
     return re.sub(r'^(RT|FAV)', '', tweet)
 
-# remove enoji and some unicode chars from tweet text
+# remove emoji and some unicode chars from tweet text
 
 
 def remove_emoji(tweet):
@@ -114,6 +117,7 @@ def remove_emoji(tweet):
 
 
 def clean_tweet(tweet):
+    global ngram
     tweet = str(tweet)
     tweet = tweet.lower()
     # remove # so we preserve hashtags for the cloud
@@ -130,6 +134,13 @@ def clean_tweet(tweet):
     tokens = [token for token in tokens if not token.isdigit()]
     tokens = [token for token in tokens if token not in stopwords.persian]
     tokens = [token for token in tokens if token not in stopwords.english]
+
+    for i in range(len(tokens) - (ngram_size - 1)):
+        word = " ".join(tokens[i:i+ngram_size])
+        if word not in ngram:
+            ngram[word] = 1
+        else:
+            ngram[word] += 1
     return " ".join(tokens).strip()
 
 # draw word cloud from tweets with persian word cloud
@@ -137,11 +148,9 @@ def clean_tweet(tweet):
 
 
 def draw_cloud(cleantweets, image_path, show_image=False):
-    text = " ".join(str(tweet) for tweet in cleantweets)
-    text = get_display(arabic_reshaper.reshape(text))
-    tokens = word_tokenize(text)
-    dic = Counter(tokens)
-    print(dic.most_common(max_words))
+    top_words = dict()
+    for key, value in Counter(ngram).most_common(max_words):
+        top_words[get_display(arabic_reshaper.reshape(key))] = value
     twitter_mask = np.array(Image.open("twitter-logo.jpg"))
     font_path = select_a_font()
     wordcloud = WordCloud(
@@ -155,7 +164,7 @@ def draw_cloud(cleantweets, image_path, show_image=False):
         background_color="white",
         mask=twitter_mask
     )
-    wordcloud.generate_from_frequencies(dic)
+    wordcloud.generate_from_frequencies(top_words)
 
     image = wordcloud.to_image()
     wordcloud.to_file(image_path)
@@ -215,6 +224,7 @@ def main():
     global image_file_path
     global limit
     global font_name
+    global ngram_size
 
     args = parser.parse_args()
     username = args.username
@@ -223,6 +233,9 @@ def main():
 
     if args.count is not None and args.count.isnumeric():
         max_words = int(args.count)
+
+    if args.ngram is not None and args.ngram.isnumeric():
+        ngram_size = int(args.ngram)
 
     limit = args.limit
     font_name = args.font
