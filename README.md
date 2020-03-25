@@ -2,6 +2,10 @@
 
 A tool to generate word cloud images from twitter user timeline.
 
+# Demo Notebook :
+
+- You can use this <a href="https://colab.research.google.com/drive/1uve4sned-qrmYm4aE7QsRS1a18twVhAz">Notebook</a> and run it online for yourself and get the output!
+
 # Requirements :
 
 - <a href="https://github.com/twintproject/twint">TWINT - Twitter Intelligence Tool</a>
